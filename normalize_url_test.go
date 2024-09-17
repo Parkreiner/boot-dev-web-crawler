@@ -1,4 +1,4 @@
-package normalize_url
+package main
 
 import (
 	"reflect"
