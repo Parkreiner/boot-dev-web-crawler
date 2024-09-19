@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -64,6 +66,31 @@ func getURLsFromHTML(htmlBody string, rawBaseURL string) ([]string, error) {
 	return uniqueHrefs, nil
 }
 
+func getHTML(rawUrl string) (string, error) {
+	res, err := http.Get(rawUrl)
+	if err != nil {
+		return "", err
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode > 400 {
+		return "", fmt.Errorf("server responded with code %d", res.StatusCode)
+	}
+
+	contentType := res.Header.Get("Content-Type")
+	if contentType != "text/html" {
+		return "", fmt.Errorf("server responded with Content-Type %s", contentType)
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
+
 func main() {
 	args := os.Args[1:]
 
@@ -79,4 +106,11 @@ func main() {
 
 	baseUrl := args[0]
 	fmt.Println("starting crawl of: " + baseUrl)
+
+	html, err := getHTML(baseUrl)
+	if err != nil {
+		panic(fmt.Sprintf("Unable to retrieve HTML for URL %s", baseUrl))
+	}
+
+	fmt.Println(html)
 }
