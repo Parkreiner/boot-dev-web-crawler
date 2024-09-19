@@ -17,7 +17,7 @@ func normalizeURL(input string) (string, error) {
 		return "", err
 	}
 
-	return parsed.Host + strings.TrimSuffix(parsed.Path, "/"), nil
+	return parsed.Scheme + "://" + parsed.Host + strings.TrimSuffix(parsed.Path, "/"), nil
 }
 
 func getURLsFromHTML(htmlBody string, rawBaseURL string) ([]string, error) {
@@ -79,7 +79,7 @@ func getHTML(rawUrl string) (string, error) {
 	}
 
 	contentType := res.Header.Get("Content-Type")
-	if contentType != "text/html" {
+	if !strings.Contains(contentType, "text/html") {
 		return "", fmt.Errorf("server responded with Content-Type %s", contentType)
 	}
 
@@ -89,6 +89,69 @@ func getHTML(rawUrl string) (string, error) {
 	}
 
 	return string(body), nil
+}
+
+func crawlPage(rawBaseUrl string) (map[string]int, error) {
+	parsedBase, err := url.Parse(rawBaseUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	pages := map[string]int{}
+
+	var crawl func(rawCurrentUrl string) error
+	crawl = func(rawCurrentUrl string) error {
+		parsedCurrent, err := url.Parse(rawCurrentUrl)
+		if err != nil {
+			return err
+		}
+
+		if parsedBase.Hostname() != parsedCurrent.Hostname() {
+			return nil
+		}
+
+		normalizedCurrent, err := normalizeURL(rawCurrentUrl)
+		if err != nil {
+			return err
+		}
+
+		if _, visited := pages[normalizedCurrent]; visited {
+			pages[normalizedCurrent]++
+			return nil
+		}
+
+		pages[normalizedCurrent] = 1
+
+		html, err := getHTML(normalizedCurrent)
+		if err != nil {
+			// Do nothing; we need to skip over any issues from some pages being
+			// based on XML
+			return nil
+		}
+
+		fmt.Println(html)
+
+		urls, err := getURLsFromHTML(html, rawBaseUrl)
+		if err != nil {
+			return err
+		}
+
+		for _, u := range urls {
+			err := crawl(u)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+
+	err = crawl(rawBaseUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	return pages, nil
 }
 
 func main() {
@@ -107,10 +170,12 @@ func main() {
 	baseUrl := args[0]
 	fmt.Println("starting crawl of: " + baseUrl)
 
-	html, err := getHTML(baseUrl)
+	pages, err := crawlPage(baseUrl)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to retrieve HTML for URL %s", baseUrl))
+		fmt.Println(err)
 	}
 
-	fmt.Println(html)
+	for url, count := range pages {
+		fmt.Printf("%s: %d\n", url, count)
+	}
 }
