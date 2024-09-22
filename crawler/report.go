@@ -10,7 +10,7 @@ type crawlerReportEntry struct {
 	frequency int
 }
 
-func (c *CrawlerConfig) CrawlerReport() string {
+func (c *crawlerConfig) CrawlerReport() string {
 	totalUrls := len(c.pages)
 	serialized := make([]crawlerReportEntry, 0, totalUrls)
 

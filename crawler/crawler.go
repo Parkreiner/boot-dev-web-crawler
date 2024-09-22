@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-type CrawlerConfig struct {
+type crawlerConfig struct {
 	pages              map[string]int // Key is URLs, ints are frequency
 	baseUrl            *url.URL
 	mu                 *sync.Mutex
@@ -13,13 +13,13 @@ type CrawlerConfig struct {
 	wg                 *sync.WaitGroup
 }
 
-func Configure(rawBaseUrl string, maxConcurrency int) (CrawlerConfig, error) {
+func Configure(rawBaseUrl string, maxConcurrency int) (crawlerConfig, error) {
 	baseUrl, err := url.Parse(rawBaseUrl)
 	if err != nil {
-		return CrawlerConfig{}, err
+		return crawlerConfig{}, err
 	}
 
-	newConfig := CrawlerConfig{
+	newConfig := crawlerConfig{
 		pages:              map[string]int{},
 		baseUrl:            baseUrl,
 		mu:                 &sync.Mutex{},

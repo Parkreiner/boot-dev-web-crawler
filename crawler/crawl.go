@@ -5,13 +5,13 @@ import (
 	"net/url"
 )
 
-func (c *CrawlerConfig) CrawlAllPages() {
+func (c *crawlerConfig) CrawlAllPages() {
 	c.wg.Add(1)
 	go c.crawlPage(c.baseUrl.Hostname())
 	c.wg.Wait()
 }
 
-func (c *CrawlerConfig) addPageVisit(normalizedUrl string) (isFirst bool) {
+func (c *crawlerConfig) addPageVisit(normalizedUrl string) (isFirst bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -24,7 +24,7 @@ func (c *CrawlerConfig) addPageVisit(normalizedUrl string) (isFirst bool) {
 	return true
 }
 
-func (c *CrawlerConfig) crawlPage(rawCurrentURL string) {
+func (c *crawlerConfig) crawlPage(rawCurrentURL string) {
 	c.concurrencyControl <- struct{}{}
 	defer func() {
 		<-c.concurrencyControl
