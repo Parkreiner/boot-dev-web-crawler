@@ -12,7 +12,8 @@ type crawlerReportEntry struct {
 
 func (c *CrawlerConfig) CrawlerReport() string {
 	totalUrls := len(c.pages)
-	serialized := make([]crawlerReportEntry, totalUrls)
+	serialized := make([]crawlerReportEntry, 0, totalUrls)
+
 	for url, freq := range c.pages {
 		serialized = append(serialized, crawlerReportEntry{
 			url:       url,
@@ -20,9 +21,12 @@ func (c *CrawlerConfig) CrawlerReport() string {
 		})
 	}
 
-	slices.SortStableFunc(serialized, func(a, b crawlerReportEntry) int {
-		return b.frequency - a.frequency
-	})
+	slices.SortStableFunc(
+		serialized,
+		func(a crawlerReportEntry, b crawlerReportEntry) int {
+			return b.frequency - a.frequency
+		},
+	)
 
 	report := fmt.Sprintf("Config has %d URLs :\n", totalUrls)
 	for _, entry := range serialized {
