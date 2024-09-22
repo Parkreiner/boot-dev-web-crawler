@@ -2,37 +2,28 @@ package crawler
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 )
 
-type crawlerEntry struct {
+type crawlerReportEntry struct {
 	url       string
 	frequency int
 }
 
-type crawlerEntryList []crawlerEntry
-
-func (l crawlerEntryList) Len() int {
-	return len(l)
-}
-func (l crawlerEntryList) Less(i int, j int) bool {
-	return (l)[i].frequency < (l)[j].frequency
-}
-func (l crawlerEntryList) Swap(i int, j int) {
-	l[i], l[j] = l[j], l[i]
-}
-
 func (c *CrawlerConfig) CrawlerReport() string {
 	totalUrls := len(c.pages)
-	serialized := make(crawlerEntryList, totalUrls)
+	serialized := make([]crawlerReportEntry, totalUrls)
 	for url, freq := range c.pages {
-		serialized = append(serialized, crawlerEntry{
+		serialized = append(serialized, crawlerReportEntry{
 			url:       url,
 			frequency: freq,
 		})
 	}
 
-	sort.Sort(sort.Reverse(serialized))
+	slices.SortStableFunc(serialized, func(a, b crawlerReportEntry) int {
+		return b.frequency - a.frequency
+	})
+
 	report := fmt.Sprintf("Config has %d URLs :\n", totalUrls)
 	for _, entry := range serialized {
 		report += fmt.Sprintf("- %d - %s", entry.frequency, entry.url)
