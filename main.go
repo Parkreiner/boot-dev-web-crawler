@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"normalize_url/crawler"
 	"os"
+	"web_crawler/crawler"
 )
 
 func main() {

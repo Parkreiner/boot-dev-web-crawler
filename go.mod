@@ -1,4 +1,4 @@
-module normalize_url
+module web_crawler
 
 go 1.22.6
 
