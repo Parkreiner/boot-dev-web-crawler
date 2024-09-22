@@ -45,7 +45,7 @@ func getHTML(rawUrl string) (string, error) {
 	return string(body), nil
 }
 
-func getURLsFromHTML(htmlBody string, rawBaseURL string) ([]string, error) {
+func getURLsFromHTML(htmlBody string, baseUrl *url.URL) ([]string, error) {
 	rootNode, err := html.Parse(strings.NewReader((htmlBody)))
 	if err != nil {
 		return []string{}, err
@@ -61,13 +61,13 @@ func getURLsFromHTML(htmlBody string, rawBaseURL string) ([]string, error) {
 					continue
 				}
 
-				href := attr.Val
-				hrefRunes := []rune(href)
-				if len(hrefRunes) == 0 || hrefRunes[0] == '/' {
-					href = rawBaseURL + href
+				href, err := url.Parse(attr.Val)
+				if err != nil {
+					continue
 				}
 
-				allHrefs = append(allHrefs, href)
+				resolvedUrl := baseUrl.ResolveReference(href)
+				allHrefs = append(allHrefs, resolvedUrl.String())
 			}
 		}
 
@@ -77,14 +77,14 @@ func getURLsFromHTML(htmlBody string, rawBaseURL string) ([]string, error) {
 	}
 	traverseNodes(rootNode)
 
-	hrefTracker := map[string]struct{}{}
+	hrefSet := map[string]struct{}{}
 	uniqueHrefs := []string{}
 
 	for _, href := range allHrefs {
-		_, found := hrefTracker[href]
+		_, found := hrefSet[href]
 		if !found {
 			uniqueHrefs = append(uniqueHrefs, href)
-			hrefTracker[href] = struct{}{}
+			hrefSet[href] = struct{}{}
 		}
 	}
 

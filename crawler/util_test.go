@@ -1,6 +1,7 @@
 package crawler
 
 import (
+	"net/url"
 	"reflect"
 	"testing"
 )
@@ -137,8 +138,19 @@ func TestGetURLsFromHTML(t *testing.T) {
 
 	for i, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			value, err := getURLsFromHTML(testCase.inputBody, testCase.inputUrl)
+			baseUrl, err := url.Parse(testCase.inputUrl)
+			if err != nil {
+				t.Errorf(
+					"Test %d - '%s' - FAIL: unable to parse input URL from test case: %v",
+					i+1,
+					testCase.name,
+					err,
+				)
 
+				return
+			}
+
+			value, err := getURLsFromHTML(testCase.inputBody, baseUrl)
 			if err != nil {
 				t.Errorf(
 					"Test %v - '%s' FAIL: unexpected error: %v",
