@@ -6,11 +6,11 @@ import (
 )
 
 type crawlerConfig struct {
-	crawled            bool
+	crawled            bool           // Indicates whether any crawling methods have been called
 	pages              map[string]int // Key is URLs, ints are frequency
 	baseUrl            *url.URL
+	concurrencyControl chan struct{} // Will be buffered based on how much concurrency will be allowed
 	mu                 *sync.Mutex
-	concurrencyControl chan struct{} // Will be buffered
 	wg                 *sync.WaitGroup
 }
 
