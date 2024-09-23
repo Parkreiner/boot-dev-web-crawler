@@ -44,3 +44,47 @@ func (c *crawlerConfig) CrawlerReport() (string, error) {
 
 	return report, nil
 }
+
+// This version of the function is required for the Boot.dev challenge
+func PrintReport(pages map[string]int, baseUrl string) {
+	fmt.Println("=============================")
+	fmt.Printf("  REPORT for %s\n", baseUrl)
+	fmt.Println("=============================")
+
+	type crawlerReportEntry struct {
+		url       string
+		frequency int
+	}
+
+	serialized := make([]crawlerReportEntry, 0, len(pages))
+	for url, freq := range pages {
+		serialized = append(serialized, crawlerReportEntry{
+			url:       url,
+			frequency: freq,
+		})
+	}
+
+	slices.SortStableFunc(
+		serialized,
+		func(a crawlerReportEntry, b crawlerReportEntry) int {
+			freqDelta := b.frequency - a.frequency
+			if freqDelta != 0 {
+				return freqDelta
+			}
+
+			if a.url < b.url {
+				return -1
+			}
+
+			if a.url > b.url {
+				return 1
+			}
+
+			return 0
+		},
+	)
+
+	for _, entry := range serialized {
+		fmt.Printf("Found %d internal links to %s\n", entry.frequency, entry.url)
+	}
+}

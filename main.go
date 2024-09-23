@@ -53,7 +53,7 @@ func main() {
 	}
 
 	fmt.Println("starting crawl of: " + baseUrl)
-	cfg.CrawlAllPages()
+	pages := cfg.CrawlAllPages()
 	fmt.Println("Crawling complete")
 
 	report, err := cfg.CrawlerReport()
@@ -63,4 +63,5 @@ func main() {
 	}
 
 	fmt.Println(report)
+	crawler.PrintReport(pages, baseUrl)
 }

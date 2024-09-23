@@ -5,11 +5,14 @@ import (
 	"net/url"
 )
 
-func (c *crawlerConfig) CrawlAllPages() {
+func (c *crawlerConfig) CrawlAllPages() map[string]int {
 	c.crawled = true
+
 	c.wg.Add(1)
 	go c.crawlPage(c.baseUrl.String())
 	c.wg.Wait()
+
+	return c.pages
 }
 
 func (c *crawlerConfig) addPageVisit(normalizedUrl string) (isFirst bool) {
