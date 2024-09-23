@@ -6,6 +6,7 @@ import (
 )
 
 type crawlerConfig struct {
+	crawled            bool
 	pages              map[string]int // Key is URLs, ints are frequency
 	baseUrl            *url.URL
 	mu                 *sync.Mutex
@@ -20,6 +21,7 @@ func Configure(rawBaseUrl string, maxConcurrency int) (crawlerConfig, error) {
 	}
 
 	newConfig := crawlerConfig{
+		crawled:            false,
 		pages:              map[string]int{},
 		baseUrl:            baseUrl,
 		mu:                 &sync.Mutex{},

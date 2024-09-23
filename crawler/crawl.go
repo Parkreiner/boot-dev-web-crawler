@@ -6,8 +6,9 @@ import (
 )
 
 func (c *crawlerConfig) CrawlAllPages() {
+	c.crawled = true
 	c.wg.Add(1)
-	go c.crawlPage(c.baseUrl.Hostname())
+	go c.crawlPage(c.baseUrl.String())
 	c.wg.Wait()
 }
 

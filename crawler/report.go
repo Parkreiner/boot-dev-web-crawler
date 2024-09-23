@@ -1,6 +1,7 @@
 package crawler
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 )
@@ -10,10 +11,18 @@ type crawlerReportEntry struct {
 	frequency int
 }
 
-func (c *crawlerConfig) CrawlerReport() string {
-	totalUrls := len(c.pages)
-	serialized := make([]crawlerReportEntry, 0, totalUrls)
+// Generates a stringified representation of
+func (c *crawlerConfig) CrawlerReport() (string, error) {
+	if !c.crawled {
+		return "", errors.New("cannot generate a report for a crawler that has not crawled yet")
+	}
 
+	totalUrls := len(c.pages)
+	if totalUrls == 0 {
+		return "No URLs to report", nil
+	}
+
+	serialized := make([]crawlerReportEntry, 0, totalUrls)
 	for url, freq := range c.pages {
 		serialized = append(serialized, crawlerReportEntry{
 			url:       url,
@@ -28,10 +37,10 @@ func (c *crawlerConfig) CrawlerReport() string {
 		},
 	)
 
-	report := fmt.Sprintf("Config has %d URLs :\n", totalUrls)
+	report := fmt.Sprintf("config has %d URLs:\n", totalUrls)
 	for _, entry := range serialized {
-		report += fmt.Sprintf("- %d - %s", entry.frequency, entry.url)
+		report += fmt.Sprintf("- %d: %s\n", entry.frequency, entry.url)
 	}
 
-	return report
+	return report, nil
 }

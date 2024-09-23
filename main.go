@@ -19,7 +19,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	const maxConcurrency = 3
+	const maxConcurrency = 10
 	baseUrl := args[0]
 	cfg, err := crawler.Configure(baseUrl, maxConcurrency)
 
@@ -32,5 +32,11 @@ func main() {
 	cfg.CrawlAllPages()
 	fmt.Println("Crawling complete")
 
-	fmt.Println(cfg.CrawlerReport())
+	report, err := cfg.CrawlerReport()
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+
+	fmt.Println(report)
 }
