@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"web_crawler/crawler"
+	crawler "web_crawler/blogCrawler"
 )
 
 func main() {
