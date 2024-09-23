@@ -6,6 +6,7 @@ import (
 )
 
 type crawlerConfig struct {
+	maxPages           int
 	crawled            bool           // Indicates whether any crawling methods have been called
 	pages              map[string]int // Key is URLs, ints are frequency
 	baseUrl            *url.URL
@@ -14,13 +15,14 @@ type crawlerConfig struct {
 	wg                 *sync.WaitGroup
 }
 
-func Configure(rawBaseUrl string, maxConcurrency int) (crawlerConfig, error) {
+func Configure(rawBaseUrl string, maxConcurrency int, maxPages int) (crawlerConfig, error) {
 	baseUrl, err := url.Parse(rawBaseUrl)
 	if err != nil {
 		return crawlerConfig{}, err
 	}
 
 	newConfig := crawlerConfig{
+		maxPages:           maxPages,
 		crawled:            false,
 		pages:              map[string]int{},
 		baseUrl:            baseUrl,

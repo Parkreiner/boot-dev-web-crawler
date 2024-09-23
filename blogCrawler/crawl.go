@@ -25,12 +25,24 @@ func (c *crawlerConfig) addPageVisit(normalizedUrl string) (isFirst bool) {
 	return true
 }
 
+func (c *crawlerConfig) PageCount() int {
+	c.mu.Lock()
+	pageCount := len(c.pages)
+	c.mu.Unlock()
+
+	return pageCount
+}
+
 func (c *crawlerConfig) crawlPage(rawCurrentURL string) {
 	c.concurrencyControl <- struct{}{}
 	defer func() {
 		<-c.concurrencyControl
 		c.wg.Done()
 	}()
+
+	if c.PageCount() > c.maxPages {
+		return
+	}
 
 	currentURL, err := url.Parse(rawCurrentURL)
 	if err != nil {
